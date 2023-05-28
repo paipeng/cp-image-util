@@ -101,8 +101,8 @@ QImage CPImageUtil::crop(const QImage& image, QVector<QPoint> cropPoints, float 
 
 QImage CPImageUtil::convertGrayLevels(const QImage& image, int grayLevel) {
     qDebug() << "convertGrayLevels: " << grayLevel;
-    char* data = (char*) malloc(sizeof(char) * image.width() * image.height());
-    memset(data, 255, sizeof (char) * image.width() * image.height());
+    uchar* data = (uchar*) malloc(sizeof(uchar) * image.width() * image.height());
+    memset(data, 255, sizeof (uchar) * image.width() * image.height());
     //const uchar *bits = image.bits();
     for (int i = 0; i < image.height(); i++) {
         for (int j = 0; j < image.width(); j++) {
@@ -110,6 +110,8 @@ QImage CPImageUtil::convertGrayLevels(const QImage& image, int grayLevel) {
             //QColor color(rgb);
             // Luminosity Method
             data[i*image.width()+j] = qRed(rgb) * 0.3 + qGreen(rgb) * 0.59 + qBlue(rgb) * 0.11;
+            int pixel = data[i*image.width()+j] / grayLevel * grayLevel;
+            data[i*image.width()+j] = pixel > 255 ? 255:pixel;
         }
     }
     QImage grayImage = QImage((uchar*)data, image.width(), image.height(), image.width(), QImage::Format_Grayscale8);
