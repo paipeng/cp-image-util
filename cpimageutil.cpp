@@ -2,7 +2,9 @@
 #include <QDebug>
 #include <QBuffer>
 #include <QPixmap>
-
+#include <QGraphicsScene>
+#include <QGraphicsPixmapItem>
+#include <QPainter>
 
 CPImageUtil::CPImageUtil()
 {
@@ -47,4 +49,72 @@ QString CPImageUtil::convertImageToBase64(const QImage& image) {
 
 QImage CPImageUtil::convertToGray(const QImage& image) {
     return image.convertToFormat(QImage::Format_Grayscale8);
+}
+
+
+
+QImage CPImageUtil::applyEffectToImage(QImage src, QGraphicsEffect *effect, int extent) {
+    if(src.isNull()) return QImage();   //No need to do anything else!
+    if(!effect) return src;             //No need to do anything else!
+    QGraphicsScene scene;
+    QGraphicsPixmapItem item;
+    item.setPixmap(QPixmap::fromImage(src));
+    item.setGraphicsEffect(effect);
+    scene.addItem(&item);
+    QImage res(src.size()+QSize(extent*2, extent*2), src.format());
+    res.fill(Qt::transparent);
+    QPainter ptr(&res);
+    scene.render(&ptr, QRectF(), QRectF( -extent, -extent, src.width()+extent*2, src.height()+extent*2 ) );
+    return res;
+}
+
+
+QImage CPImageUtil::crop(const QImage& image, QVector<QPoint> cropPoints, float  expandFactor, int orientation) {
+    QRect rect(cropPoints.at(0).x(), cropPoints.at(0).y(), cropPoints.at(1).x() - cropPoints.at(0).x(), cropPoints.at(2).y() - cropPoints.at(1).y());
+
+    if (expandFactor != 1) {
+        int crop_width = rect.width();
+        int crop_height = rect.height();
+
+        int offset_x = (expandFactor * crop_width - crop_width)/2;
+        int offset_y = (expandFactor * crop_height - crop_height)/2;
+
+        rect.setLeft(rect.left() - offset_x);
+        rect.setTop(rect.top() - offset_y);
+
+        rect.setWidth(expandFactor * crop_width);
+        rect.setHeight(rect.width());//23*crop_height/21);
+    }
+    qDebug() << "crop rect: " << rect;
+
+    QImage cropImage = image.copy(rect);
+
+    // rotate
+    if (orientation != 0) {
+        return cropImage.transformed(QTransform().rotate(orientation));
+    } else {
+        return cropImage;
+    }
+}
+
+
+
+QImage CPImageUtil::convertGrayLevels(const QImage& image, int grayLevel) {
+    qDebug() << "convertGrayLevels: " << grayLevel;
+    char* data = (char*) malloc(sizeof(char) * image.width() * image.height());
+    memset(data, 255, sizeof (char) * image.width() * image.height());
+    //const uchar *bits = image.bits();
+    for (int i = 0; i < image.height(); i++) {
+        for (int j = 0; j < image.width(); j++) {
+            QRgb rgb =  image.pixel(j ,i);
+            //QColor color(rgb);
+            // Luminosity Method
+            data[i*image.width()+j] = qRed(rgb) * 0.3 + qGreen(rgb) * 0.59 + qBlue(rgb) * 0.11;
+        }
+    }
+    QImage grayImage = QImage((uchar*)data, image.width(), image.height(), image.width(), QImage::Format_Grayscale8);
+    free(data);
+
+    qDebug() << "convertGrayLevels done";
+    return grayImage;
 }
