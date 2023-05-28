@@ -1,0 +1,12 @@
+#ifndef CPIMAGEUTIL_GLOBAL_H
+#define CPIMAGEUTIL_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(CPIMAGEUTIL_LIBRARY)
+#  define CPIMAGEUTIL_EXPORT Q_DECL_EXPORT
+#else
+#  define CPIMAGEUTIL_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // CPIMAGEUTIL_GLOBAL_H
