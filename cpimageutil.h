@@ -18,7 +18,7 @@ public:
     static QImage crop(const QImage& image, QVector<QPoint> cropPoints, float  expandFactor, int orientation);
     static QImage convertGrayLevels(const QImage& image, int grayLevel = 16);
     static int* calculateHistogram(const QImage& image);
-    static QImage createGrayImage(const uchar* data, QSize size);
+    static QImage createGrayImage(const uchar* data, int width, int height, int bitsperline);
 };
 
 #endif // CPIMAGEUTIL_H

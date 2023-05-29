@@ -101,8 +101,11 @@ QImage CPImageUtil::crop(const QImage& image, QVector<QPoint> cropPoints, float 
 
 QImage CPImageUtil::convertGrayLevels(const QImage& image, int grayLevel) {
     qDebug() << "convertGrayLevels: " << grayLevel << " image size: " << image.width() << "-" << image.height();
-    uchar* data = (uchar*) malloc(sizeof(uchar) * image.width() * image.height());
-    memset(data, 255, sizeof (uchar) * image.width() * image.height());
+
+    int width = (image.width() % 4 != 0)?(image.width() /4 * 4 +4): image.width();
+
+    uchar* data = (uchar*) malloc(sizeof(uchar) * width * image.height());
+    memset(data, 255, sizeof (uchar) * width * image.height());
     //const uchar *bits = image.bits();
     for (int i = 0; i < image.height(); i++) {
         for (int j = 0; j < image.width(); j++) {
@@ -111,10 +114,10 @@ QImage CPImageUtil::convertGrayLevels(const QImage& image, int grayLevel) {
             // Luminosity Method
             int pixel =  ((int)((float)qRed(rgb) * 0.3 + (float)qGreen(rgb) * 0.59 + (float)qBlue(rgb) * 0.11)) / grayLevel * grayLevel;
             //qDebug() << pixel;
-            data[i*image.width()+j] = pixel > 255 ? 255:pixel;
+            data[i*width+j] = pixel > 255 ? 255:pixel;
         }
     }
-    QImage grayImage = createGrayImage(data, QSize(image.width(), image.height()));
+    QImage grayImage = createGrayImage(data, image.width(), image.height(), width);
     free(data);
     //grayImage.save("/Users/paipeng/passfoto.bmp", "bmp");
 
@@ -143,8 +146,8 @@ int* CPImageUtil::calculateHistogram(const QImage& image) {
     return histogram;
 }
 
-QImage CPImageUtil::createGrayImage(const uchar* data, QSize size) {
-    QImage image = QImage(size, QImage::Format_Grayscale8);
-    memcpy(image.bits(), data, sizeof(uchar)*image.width()*image.height());
+QImage CPImageUtil::createGrayImage(const uchar* data, int width, int height, int bitsperline) {
+    QImage image = QImage(data, width, height, bitsperline, QImage::Format_Grayscale8);
+    //memcpy(image.bits(), data, sizeof(uchar)*image.width()*image.height());
     return image;
 }
