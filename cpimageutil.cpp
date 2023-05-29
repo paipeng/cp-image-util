@@ -100,7 +100,7 @@ QImage CPImageUtil::crop(const QImage& image, QVector<QPoint> cropPoints, float 
 
 
 QImage CPImageUtil::convertGrayLevels(const QImage& image, int grayLevel) {
-    qDebug() << "convertGrayLevels: " << grayLevel;
+    qDebug() << "convertGrayLevels: " << grayLevel << " image size: " << image.width() << "-" << image.height();
     uchar* data = (uchar*) malloc(sizeof(uchar) * image.width() * image.height());
     memset(data, 255, sizeof (uchar) * image.width() * image.height());
     //const uchar *bits = image.bits();
@@ -109,13 +109,14 @@ QImage CPImageUtil::convertGrayLevels(const QImage& image, int grayLevel) {
             QRgb rgb =  image.pixel(j ,i);
             //QColor color(rgb);
             // Luminosity Method
-            data[i*image.width()+j] = qRed(rgb) * 0.3 + qGreen(rgb) * 0.59 + qBlue(rgb) * 0.11;
-            int pixel = data[i*image.width()+j] / grayLevel * grayLevel;
+            int pixel =  ((int)((float)qRed(rgb) * 0.3 + (float)qGreen(rgb) * 0.59 + (float)qBlue(rgb) * 0.11)) / grayLevel * grayLevel;
+            //qDebug() << pixel;
             data[i*image.width()+j] = pixel > 255 ? 255:pixel;
         }
     }
-    QImage grayImage = QImage((uchar*)data, image.width(), image.height(), image.width(), QImage::Format_Grayscale8);
+    QImage grayImage = createGrayImage(data, QSize(image.width(), image.height()));
     free(data);
+    //grayImage.save("/Users/paipeng/passfoto.bmp", "bmp");
 
     qDebug() << "convertGrayLevels done";
     return grayImage;
@@ -140,4 +141,10 @@ int* CPImageUtil::calculateHistogram(const QImage& image) {
         }
     }
     return histogram;
+}
+
+QImage CPImageUtil::createGrayImage(const uchar* data, QSize size) {
+    QImage image = QImage(size, QImage::Format_Grayscale8);
+    memcpy(image.bits(), data, sizeof(uchar)*image.width()*image.height());
+    return image;
 }
