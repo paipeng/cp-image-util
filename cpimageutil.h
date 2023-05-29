@@ -17,6 +17,7 @@ public:
     static QImage applyEffectToImage(QImage src, QGraphicsEffect *effect, int extent);
     static QImage crop(const QImage& image, QVector<QPoint> cropPoints, float  expandFactor, int orientation);
     static QImage convertGrayLevels(const QImage& image, int grayLevel = 16);
+    static int* calculateHistogram(const QImage& image);
 };
 
 #endif // CPIMAGEUTIL_H

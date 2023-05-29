@@ -120,3 +120,24 @@ QImage CPImageUtil::convertGrayLevels(const QImage& image, int grayLevel) {
     qDebug() << "convertGrayLevels done";
     return grayImage;
 }
+
+int* CPImageUtil::calculateHistogram(const QImage& image) {
+    int *histogram = (int*) malloc(sizeof (int)*256);
+    memset(histogram, 0, sizeof (int) * 256);
+
+    for (int i = 0; i < image.height(); i++) {
+        for (int j = 0; j < image.width(); j++) {
+            QRgb rgb =  image.pixel(j ,i);
+            //QColor color(rgb);
+            // Luminosity Method
+            int pixel = qGray(rgb);
+            if (pixel > 255) {
+                pixel = 255;
+            } else if (pixel < 0) {
+                pixel = 0;
+            }
+            histogram[pixel] ++;
+        }
+    }
+    return histogram;
+}
