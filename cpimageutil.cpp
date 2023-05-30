@@ -148,6 +148,6 @@ int* CPImageUtil::calculateHistogram(const QImage& image) {
 
 QImage CPImageUtil::createGrayImage(const uchar* data, int width, int height, int bitsperline) {
     QImage image = QImage(data, width, height, bitsperline, QImage::Format_Grayscale8);
-    //memcpy(image.bits(), data, sizeof(uchar)*image.width()*image.height());
+    memcpy(image.bits(), data, sizeof(uchar)*image.width()*image.height());
     return image;
 }
